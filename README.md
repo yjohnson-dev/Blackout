@@ -1,34 +1,28 @@
 # Blackout
 
-Blackout turns the screen black when you are not at the game. It keeps the blackout safe for OLED
-monitors and out of the way.
+Blackout turns the screen black when the game isn't actively in focus or when AFK.
+
+> [!warning[
+> This plugin was written with assistance of an LLM. I have verified the functionality of the app and some surface-level security aspects, but I recommend you do the same before deciding to use untrusted code from the web. 
 
 ## What it does
 
-- The screen goes black when the game is in the background or when you do not touch the controls.
-- The screen stays on during cutscenes.
-- You can change the behavior for a duty, for crafting, and for other situations.
-- A dim reminder shows that the game is still running. The reminder moves to a new position each time.
-- The game can mute chosen audio channels while the screen is black.
-- A duty that is ready brings the picture back.
+- The screen goes black when the game is in the background or when you don't interact with the keyboard/controller.
+- You can change the behavior when in a duty, in a cutscene, or other contexts.
+- A dim reminder shows that the game is still running, in case you have an OLED and can't tell when your screen is on. 
+- You can mute certain audio channels when entering blackout
 
 ## Requirements
 
-- Windows.
-- XIVLauncher with Dalamud, API level 15 or later.
+- XIVLauncher with Dalamud
 
 ## Install
 
-1. In the game, open `/xlsettings`.
-2. Open the **Experimental** tab.
-3. Add this URL to **Custom Plugin Repositories**:
+Add this URL to **Custom Plugin Repositories**:
 
    ```
    https://raw.githubusercontent.com/yjohnson-dev/Blackout/main/pluginmaster.json
    ```
-
-4. Select the **+** button and save the settings.
-5. Open `/xlplugins`, search for **Blackout**, and install it.
 
 This is a third-party plugin. It is not reviewed by the Dalamud team.
 
@@ -42,18 +36,12 @@ This is a third-party plugin. It is not reviewed by the Dalamud team.
 | `/blackout on` | Turn the plugin on. |
 | `/blackout off` | Turn the plugin off. |
 
-You can also bind `/blackout now` to a macro.
-
 ## Build
-
-The build runs in a container, so no .NET SDK is necessary on the host.
 
 ```sh
 ./scripts/build.sh
 ```
 
-The script builds the plugin and copies it to the Dalamud `devPlugins` folder.
-
 ## License
 
-MIT. See `LICENSE`.
+MIT
