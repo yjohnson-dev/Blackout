@@ -1,0 +1,87 @@
+name: update-dalamud
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Compare the pinned SDK with NuGet
+        id: check
+        run: |
+          set -euo pipefail
+          current=$(grep -oP 'Dalamud\.NET\.Sdk/\K[0-9]+\.[0-9]+\.[0-9]+' src/Blackout/Blackout.csproj)
+          latest=$(curl -s https://api.nuget.org/v3-flatcontainer/dalamud.net.sdk/index.json \
+            | python3 -c "import sys,json; print('\n'.join(json.load(sys.stdin)['versions']))" | sort -V | tail -1)
+          stable=$(curl -s https://goatcorp.github.io/dalamud-distrib/version \
+            | python3 -c "import sys,json; print(json.load(sys.stdin)['AssemblyVersion'])")
+
+          latest_major=${latest%%.*}
+          stable_major=${stable%%.*}
+
+          echo "pinned=$current latest=$latest stable Dalamud=$stable"
+
+          if [ "$current" = "$latest" ]; then
+            echo "action=none" >> "$GITHUB_OUTPUT"
+          elif [ "$latest_major" -gt "$stable_major" ]; then
+            echo "action=none" >> "$GITHUB_OUTPUT"
+            echo "::notice::SDK $latest is ahead of stable Dalamud $stable. Nothing to do yet."
+          else
+            echo "action=update" >> "$GITHUB_OUTPUT"
+            echo "latest=$latest" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Bump the SDK
+        if: steps.check.outputs.action == 'update'
+        run: |
+          sed -i "s#Dalamud\.NET\.Sdk/[0-9]\+\.[0-9]\+\.[0-9]\+#Dalamud.NET.Sdk/${{ steps.check.outputs.latest }}#" src/Blackout/Blackout.csproj
+
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+        if: steps.check.outputs.action == 'update'
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Verify the build against the matching Dalamud
+        if: steps.check.outputs.action == 'update'
+        run: |
+          set -euo pipefail
+          sdk_major=$(grep -oP 'Dalamud\.NET\.Sdk/\K[0-9]+' src/Blackout/Blackout.csproj)
+          stable_major=$(curl -s https://goatcorp.github.io/dalamud-distrib/version \
+            | python3 -c "import sys,json; print(json.load(sys.stdin)['AssemblyVersion'].split('.')[0])")
+          if [ "$sdk_major" -gt "$stable_major" ]; then
+            url="https://goatcorp.github.io/dalamud-distrib/api${sdk_major}/latest.zip"
+          else
+            url="https://goatcorp.github.io/dalamud-distrib/latest.zip"
+          fi
+          echo "Using $url"
+          curl -sL -o dalamud.zip "$url"
+          unzip -q dalamud.zip -d dalamud
+          DALAMUD_HOME="$PWD/dalamud" dotnet build src/Blackout/Blackout.csproj -c Release -o out-verify
+          rm -rf dalamud dalamud.zip out-verify
+
+      - name: Open a pull request
+        if: steps.check.outputs.action == 'update'
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          add-paths: |
+            src/Blackout/Blackout.csproj
+            src/Blackout/packages.lock.json
+          branch: update-dalamud-sdk
+          base: main
+          commit-message: "Bump Dalamud.NET.Sdk to ${{ steps.check.outputs.latest }}"
+          title: "Bump Dalamud.NET.Sdk to ${{ steps.check.outputs.latest }}"
+          body: |
+            Dalamud published API level ${{ steps.check.outputs.latest }}.
+
+            This pull request bumps the build SDK. The verification build passed against the matching distribution.
+
+            Review the code for source-breaking API changes, then merge and tag a release.

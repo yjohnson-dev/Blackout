@@ -20,7 +20,17 @@ jobs:
 
       - name: Download the Dalamud libraries
         run: |
-          curl -sL -o dalamud.zip https://goatcorp.github.io/dalamud-distrib/latest.zip
+          set -euo pipefail
+          sdk_major=$(grep -oP 'Dalamud\.NET\.Sdk/\K[0-9]+' src/Blackout/Blackout.csproj)
+          stable_major=$(curl -s https://goatcorp.github.io/dalamud-distrib/version \
+            | python3 -c "import sys,json; print(json.load(sys.stdin)['AssemblyVersion'].split('.')[0])")
+          if [ "$sdk_major" -gt "$stable_major" ]; then
+            url="https://goatcorp.github.io/dalamud-distrib/api${sdk_major}/latest.zip"
+          else
+            url="https://goatcorp.github.io/dalamud-distrib/latest.zip"
+          fi
+          echo "Using $url"
+          curl -sL -o dalamud.zip "$url"
           unzip -q dalamud.zip -d dalamud
 
       - name: Build
