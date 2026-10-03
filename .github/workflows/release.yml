@@ -1,0 +1,60 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Download the Dalamud libraries
+        run: |
+          curl -sL -o dalamud.zip https://goatcorp.github.io/dalamud-distrib/latest.zip
+          unzip -q dalamud.zip -d dalamud
+
+      - name: Build
+        env:
+          DALAMUD_HOME: ${{ github.workspace }}/dalamud
+          VERSION: ${{ github.ref_name }}
+        run: dotnet build src/Blackout/Blackout.csproj -c Release -o out -p:Version="${VERSION#v}"
+
+      - name: Collect the plugin package
+        run: cp out/Blackout/latest.zip Blackout.zip
+
+      - name: Create the release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Blackout.zip
+
+      - name: Update pluginmaster.json
+        run: |
+          python3 - <<'PY'
+          import json, time
+
+          manifest = json.load(open("out/Blackout.json"))
+          entries = json.load(open("pluginmaster.json"))
+          entry = entries[0]
+          entry["AssemblyVersion"] = manifest["AssemblyVersion"]
+          entry["DalamudApiLevel"] = manifest["DalamudApiLevel"]
+          entry["LastUpdate"] = int(time.time())
+          json.dump(entries, open("pluginmaster.json", "w"), indent=2)
+          open("pluginmaster.json", "a").write("\n")
+          PY
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pluginmaster.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Update pluginmaster.json for ${GITHUB_REF_NAME}"
+          git push origin HEAD:main

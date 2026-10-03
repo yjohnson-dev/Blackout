@@ -1,0 +1,7 @@
+bin/
+obj/
+out/
+*.zip
+*.user
+.vs/
+.idea/

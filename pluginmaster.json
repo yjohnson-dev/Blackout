@@ -1,0 +1,18 @@
+[
+  {
+    "Author": "yjohnson-dev",
+    "Name": "Blackout",
+    "InternalName": "Blackout",
+    "Punchline": "Turns the screen black while you are away or the game is in the background.",
+    "Description": "Fades the screen to black when the game is in the background or when you are away. You can change the behavior for duties, crafting, and other situations. A timer shows that the game is still running. This plugin helps to prevent burn-in on OLED monitors.",
+    "RepoUrl": "https://github.com/yjohnson-dev/Blackout",
+    "ApplicableVersion": "any",
+    "DalamudApiLevel": 15,
+    "AssemblyVersion": "1.0.0.0",
+    "DownloadLinkInstall": "https://github.com/yjohnson-dev/Blackout/releases/latest/download/Blackout.zip",
+    "DownloadLinkUpdate": "https://github.com/yjohnson-dev/Blackout/releases/latest/download/Blackout.zip",
+    "LastUpdate": 0,
+    "Tags": ["oled", "burn-in", "afk", "utility"],
+    "IsHide": false
+  }
+]
