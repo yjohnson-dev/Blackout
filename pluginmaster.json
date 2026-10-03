@@ -11,8 +11,13 @@
     "AssemblyVersion": "1.0.0.0",
     "DownloadLinkInstall": "https://github.com/yjohnson-dev/Blackout/releases/latest/download/Blackout.zip",
     "DownloadLinkUpdate": "https://github.com/yjohnson-dev/Blackout/releases/latest/download/Blackout.zip",
-    "LastUpdate": 0,
-    "Tags": ["oled", "burn-in", "afk", "utility"],
+    "LastUpdate": 1791002108,
+    "Tags": [
+      "oled",
+      "burn-in",
+      "afk",
+      "utility"
+    ],
     "IsHide": false
   }
 ]
