@@ -110,13 +110,13 @@ public sealed class ConfigWindow : Window
 
         if (Checkbox(Strings.BackgroundEnabled, config.BackgroundEnabled, v => config.BackgroundEnabled = v))
             this.plugin.MarkDirty();
-        this.Slider(Strings.BackgroundAfter, config.BackgroundSeconds, 3, 120, "%d sec", v => config.BackgroundSeconds = v, !config.BackgroundEnabled);
+        this.Slider($"{Strings.BackgroundAfter}##background", config.BackgroundSeconds, 3, 120, "%d sec", v => config.BackgroundSeconds = v, !config.BackgroundEnabled);
 
         ImGui.Spacing();
 
         if (Checkbox(Strings.AwayEnabled, config.AwayEnabled, v => config.AwayEnabled = v, Strings.AwayHelp))
             this.plugin.MarkDirty();
-        this.Slider(Strings.AwayAfter, config.AwayMinutes, 1, 30, "%d min", v => config.AwayMinutes = v, !config.AwayEnabled);
+        this.Slider($"{Strings.AwayAfter}##away", config.AwayMinutes, 1, 30, "%d min", v => config.AwayMinutes = v, !config.AwayEnabled);
 
         ImGui.Spacing();
         this.Slider(Strings.FadeTime, config.FadeMs, 0, 1000, "%d ms", v => config.FadeMs = v, false, Strings.FadeTimeHelp);
