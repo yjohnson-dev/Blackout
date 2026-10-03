@@ -2,7 +2,7 @@
 
 Blackout turns the screen black when the game isn't actively in focus or when AFK.
 
-> [!warning[
+> [!warning]
 > This plugin was written with assistance of an LLM. I have verified the functionality of the app and some surface-level security aspects, but I recommend you do the same before deciding to use untrusted code from the web. 
 
 ## What it does
