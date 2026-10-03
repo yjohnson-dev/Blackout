@@ -15,46 +15,50 @@ internal static class Strings
     public const string TabStatus = "Status";
 
     // Timing tab.
-    public const string BackgroundEnabled = "When the game is in the background";
+    public const string BackgroundEnabled = "Turn the screen black when the game is in the background";
     public const string BackgroundAfter = "after";
-    public const string AwayEnabled = "When I'm away (no input)";
+    public const string AwayEnabled = "Turn the screen black when I'm away (no input)";
     public const string AwayAfter = "after";
-    public const string FadeTime = "Fade to black";
+    public const string FadeTime = "Fade duration";
     public const string OnlyWhenLoggedIn = "Only while logged in";
-    public const string OnlyWhenLoggedInHint = "Stops it blacking out at the title screen or character select.";
-    public const string SliderHint = "Ctrl+Click any slider to type an exact value.";
+    public const string SliderTip = "Tip: Ctrl+click any slider to type an exact value.";
+
+    // Timing help.
+    public const string AwayHelp = "Away means no keyboard, mouse, or controller input.";
+    public const string FadeTimeHelp = "How long the screen takes to fade to black.";
+    public const string OnlyWhenLoggedInHelp = "Keep the screen on at the title screen and character select.";
 
     // Contexts tab.
-    public const string ContextsHint1 = "When several apply, the most relaxed wins: Off beats everything,";
-    public const string ContextsHint2 = "otherwise the longest delay is used. Green = active right now.";
+    public const string ContextsHint = "Choose how Blackout behaves in each context.";
     public const string ColumnContext = "Context";
     public const string ColumnBehavior = "Behavior";
     public const string ColumnBackground = "In background";
     public const string ColumnAway = "Away";
-    public const string Default = "default";
     public const string Dash = "-";
 
     // Alerts tab.
-    public const string WakeSection = "Wake me when";
-    public const string WakeDuty = "A duty is ready";
-    public const string WakeDutyHint = "The picture stays on while the popup is up.";
-    public const string WakeTell = "I get a direct message";
-    public const string WakeStay = "Stay visible for";
-    public const string WakeHint = "Sound comes back with the picture.";
-    public const string ReminderSection = "Reminder while blacked out";
-    public const string ReminderEnabled = "Remind me the game is still running";
-    public const string ReminderEvery = "every";
-    public const string ReminderBrightness = "brightness";
-    public const string ReminderShowFor = "for";
-    public const string ReminderHint = "Dim text in a new spot each time, so it can't burn in.";
+    public const string WakeSection = "Bring the screen back when";
+    public const string WakeDuty = "A duty pop appears";
+    public const string WakeTell = "A tell arrives";
+    public const string WakeStay = "Stay on for";
+    public const string WakeStayHelp = "How long the screen stays on after a tell.";
+
+    public const string ReminderSection = "Reminder while the screen is black";
+    public const string ReminderEnabled = "Show a reminder that the game is still running";
+    public const string ReminderEvery = "Repeat every";
+    public const string ReminderBrightness = "Text brightness";
+    public const string ReminderShowFor = "Show for";
 
     // General tab.
     public const string AudioSection = "Audio";
-    public const string MuteEnabled = "Mute game audio while blacked out";
+    public const string MuteEnabled = "Mute game audio while the screen is black";
     public const string DtrSection = "Server info bar";
-    public const string DtrEnabled = "Show a countdown before blacking out";
-    public const string DtrLead = "appears within";
-    public const string DtrHint = "Hidden the rest of the time, and while blacked out.";
+    public const string DtrEnabled = "Show a countdown before the screen goes black";
+    public const string DtrLead = "Appears within";
+
+    public const string CoverageSection = "Screen coverage";
+    public const string KeepWindowsVisible = "Keep plugin windows visible while the screen is black";
+    public const string KeepWindowsVisibleHelp = "Renders over the native game rendering and UI, but not other plugin windows.";
 
     // Footer.
     public const string Preview = "Preview (5s)";
@@ -65,29 +69,37 @@ internal static class Strings
     public const string StatusNow = "Now";
     public const string StatusIdle = "Idle";
     public const string StatusContext = "Context";
-    public const string StatusNext = "Blacks out";
+    public const string StatusNext = "Blackout";
+    public const string StatusIdleHelp = "Time since the last keyboard, mouse, or controller input.";
 
     // Status values.
     public const string Disabled = "Disabled";
     public const string WaitingForLogin = "Waiting for login";
-    public const string Watching = "Watching";
+    public const string OnStandby = "On standby";
+    public const string NoTriggerEnabled = "No trigger enabled";
 
     // Chat.
-    public const string CommandUsage = "Usage: /blackout [now | preview | on | off]";
-    public const string EnabledMessage = "Blackout is enabled.";
-    public const string DisabledMessage = "Blackout is disabled.";
+    public const string CommandUsage =
+        "Blackout commands:\n" +
+        "  /blackout: open settings\n" +
+        "  /blackout now: turn the screen black now\n" +
+        "  /blackout preview: 5-second preview\n" +
+        "  /blackout on / off: turn the plugin on or off";
+
+    public const string EnabledMessage = "Blackout is on.";
+    public const string DisabledMessage = "Blackout is off.";
 
     // Reminder and server info bar.
     public const string ReminderLine1 = "FINAL FANTASY XIV is still running";
     public const string DtrTooltip = "The screen will go black shortly. Move the mouse to postpone.";
 
     // Wake notes.
-    public const string WakeDutyNote = "a duty is ready";
-    public const string WakeTellNote = "a direct message";
+    public const string WakeDutyNote = "a duty pop";
+    public const string WakeTellNote = "a tell";
 
-    public static string ReminderLine2(long blackForMs) => $"Black for {Format.Duration(blackForMs)} - any input to return";
+    public static string ReminderLine2(long blackForMs) => $"Screen black for {Format.Duration(blackForMs)}. Any input brings it back.";
 
-    public static string DtrText(long remainingMs) => $"Blackout {Format.Duration(remainingMs)}";
+    public static string DtrText(long remainingMs) => $"Blackout in {Format.Duration(remainingMs)}";
 
     public static string Context(GameContext context) => context switch
     {
@@ -108,8 +120,8 @@ internal static class Strings
 
     public static string Mode(ContextMode mode) => mode switch
     {
-        ContextMode.On => "On",
-        ContextMode.Custom => "On, custom timing",
+        ContextMode.On => "Default timing",
+        ContextMode.Custom => "Custom timing",
         ContextMode.Off => "Off",
         _ => mode.ToString(),
     };
@@ -134,17 +146,15 @@ internal static class Strings
             return WaitingForLogin;
 
         if (status.WakeNote is { } note)
-            return note;
+            return $"Paused by {note}";
 
-        return status.Reason switch
-        {
-            BlackoutReason.Preview => "Preview",
-            BlackoutReason.Manual => "Blacked out (command)",
-            BlackoutReason.Away => "Blacked out (away)",
-            BlackoutReason.Background => "Blacked out (background)",
-            _ when status.BlackoutInMs is { } ms => $"Blacks out in {Format.Duration(ms)}",
-            _ => Watching,
-        };
+        if (status.TurnedOffBy is { } off)
+            return $"Held off ({Context(off)})";
+
+        if (status.BlackoutInMs is { } ms)
+            return $"Screen black in {Format.Duration(ms)}";
+
+        return config.BackgroundEnabled || config.AwayEnabled ? OnStandby : NoTriggerEnabled;
     }
 
     public static string StatusNowText(Configuration config, BlackoutStatus status)
@@ -156,17 +166,18 @@ internal static class Strings
             return WaitingForLogin;
 
         if (status.WakeNote is { } note)
-            return $"Watching - woken by {note}";
+            return $"Paused by {note}";
 
-        return status.Reason switch
-        {
-            BlackoutReason.Preview => "Black (preview)",
-            BlackoutReason.Manual => "Black (command)",
-            BlackoutReason.Away => "Black (you're away)",
-            BlackoutReason.Background => "Black (game in the background)",
-            _ when status.Focused => "Watching (game focused)",
-            _ => $"In the background for {Format.Duration(status.BackgroundForMs)}",
-        };
+        if (status.TurnedOffBy is { } off)
+            return $"Held off while {Context(off)}";
+
+        if (!config.BackgroundEnabled && !config.AwayEnabled)
+            return NoTriggerEnabled;
+
+        if (status.Focused)
+            return "On standby (game focused)";
+
+        return $"Game in the background for {Format.Duration(status.BackgroundForMs)}";
     }
 
     public static string StatusIdleText(BlackoutStatus status) => Format.Duration(status.IdleMs);
@@ -178,9 +189,9 @@ internal static class Strings
 
         var text = string.Join(", ", status.ActiveContexts.Select(Context));
         if (status.TurnedOffBy is { } off)
-            text += $" - off ({Context(off)})";
+            text += $" (off while {Context(off)})";
         else if (status.UsingCustomTiming)
-            text += " - custom timing";
+            text += " (custom timing)";
 
         return text;
     }
@@ -190,15 +201,12 @@ internal static class Strings
         if (!config.Enabled || status.WaitingForLogin)
             return Dash;
 
-        if (status.Reason is BlackoutReason.Away or BlackoutReason.Background or BlackoutReason.Manual)
-            return $"Black for {Format.Duration(status.BlackForMs)}";
-
         if (status.TurnedOffBy is { } off)
-            return $"Not while: {Context(off)}";
+            return $"off while {Context(off)}";
 
         if (status.BlackoutInMs is { } ms)
             return $"in {Format.Duration(ms)}";
 
-        return "Never (both timers are off)";
+        return "never (both timers are off)";
     }
 }

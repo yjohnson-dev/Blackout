@@ -67,7 +67,7 @@ public sealed class Plugin : IDalamudPlugin
 
         Commands.AddHandler(CommandName, new CommandInfo(this.OnCommand)
         {
-            HelpMessage = "Open the settings. You can also use /blackout now, /blackout preview, /blackout on, or /blackout off.",
+            HelpMessage = "Open the Blackout settings. You can also use /blackout now, /blackout preview, /blackout on, or /blackout off.",
         });
     }
 

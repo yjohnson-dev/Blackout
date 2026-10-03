@@ -13,7 +13,9 @@ internal sealed class Overlay
     public void Draw(float alpha, Configuration config, BlackoutStatus status)
     {
         var viewport = ImGui.GetMainViewport();
-        var drawList = ImGui.GetForegroundDrawList();
+        var drawList = config.KeepPluginWindowsVisible
+            ? ImGui.GetBackgroundDrawList()
+            : ImGui.GetForegroundDrawList();
         drawList.AddRectFilled(viewport.Pos, viewport.Pos + viewport.Size, Rgba(0, alpha));
 
         if (alpha < 1f || !config.ReminderEnabled)

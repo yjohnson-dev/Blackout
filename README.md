@@ -7,10 +7,10 @@ Blackout turns the screen black when the game isn't actively in focus or when AF
 
 ## What it does
 
-- The screen goes black when the game is in the background or when you don't interact with the keyboard/controller.
-- You can change the behavior when in a duty, in a cutscene, or other contexts.
-- A dim reminder shows that the game is still running, in case you have an OLED and can't tell when your screen is on. 
-- You can mute certain audio channels when entering blackout
+- The screen goes black when the game is in the background or when you don't interact with the keyboard or controller.
+- You can change the behavior for duties, cutscenes, and other contexts.
+- A dim reminder shows that the game is still running, so you can tell an OLED is still on.
+- You can mute certain audio channels while blacked out.
 
 ## Requirements
 
@@ -31,8 +31,8 @@ This is a third-party plugin. It is not reviewed by the Dalamud team.
 | Command | Result |
 | --- | --- |
 | `/blackout` | Open or close the settings window. |
-| `/blackout now` | Turn the screen black immediately. Any input brings it back. |
-| `/blackout preview` | Turn the screen black for 5 seconds. |
+| `/blackout now` | Start or stop an immediate blackout. Any input brings the screen back. |
+| `/blackout preview` | Show the blackout for 5 seconds. |
 | `/blackout on` | Turn the plugin on. |
 | `/blackout off` | Turn the plugin off. |
 

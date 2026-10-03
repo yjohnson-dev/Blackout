@@ -1,6 +1,7 @@
 using System;
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 
@@ -113,20 +114,19 @@ public sealed class ConfigWindow : Window
 
         ImGui.Spacing();
 
-        if (Checkbox(Strings.AwayEnabled, config.AwayEnabled, v => config.AwayEnabled = v))
+        if (Checkbox(Strings.AwayEnabled, config.AwayEnabled, v => config.AwayEnabled = v, Strings.AwayHelp))
             this.plugin.MarkDirty();
         this.Slider(Strings.AwayAfter, config.AwayMinutes, 1, 30, "%d min", v => config.AwayMinutes = v, !config.AwayEnabled);
 
         ImGui.Spacing();
-        this.Slider(Strings.FadeTime, config.FadeMs, 0, 1000, "%d ms", v => config.FadeMs = v, false);
+        this.Slider(Strings.FadeTime, config.FadeMs, 0, 1000, "%d ms", v => config.FadeMs = v, false, Strings.FadeTimeHelp);
 
         ImGui.Spacing();
 
-        if (Checkbox(Strings.OnlyWhenLoggedIn, config.OnlyWhenLoggedIn, v => config.OnlyWhenLoggedIn = v))
+        if (Checkbox(Strings.OnlyWhenLoggedIn, config.OnlyWhenLoggedIn, v => config.OnlyWhenLoggedIn = v, Strings.OnlyWhenLoggedInHelp))
             this.plugin.MarkDirty();
 
-        ImGui.TextDisabled(Strings.OnlyWhenLoggedInHint);
-        ImGui.TextDisabled(Strings.SliderHint);
+        ImGui.TextDisabled(Strings.SliderTip);
     }
 
     private void DrawContexts()
@@ -134,8 +134,7 @@ public sealed class ConfigWindow : Window
         var config = this.Config;
         var active = this.plugin.Controller.Status.ActiveContexts;
 
-        ImGui.TextDisabled(Strings.ContextsHint1);
-        ImGui.TextDisabled(Strings.ContextsHint2);
+        ImGui.TextDisabled(Strings.ContextsHint);
         ImGui.Spacing();
 
         const ImGuiTableFlags flags = ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.SizingStretchProp;
@@ -181,6 +180,7 @@ public sealed class ConfigWindow : Window
             }
 
             var custom = settings.Mode == ContextMode.Custom;
+            var usesDefaults = settings.Mode == ContextMode.On;
 
             ImGui.TableNextColumn();
             if (custom)
@@ -191,7 +191,7 @@ public sealed class ConfigWindow : Window
             }
             else
             {
-                ImGui.TextDisabled(settings.Mode == ContextMode.On ? Strings.Default : Strings.Dash);
+                ImGui.TextDisabled(usesDefaults ? $"{config.BackgroundSeconds} sec" : Strings.Dash);
             }
 
             ImGui.TableNextColumn();
@@ -203,7 +203,7 @@ public sealed class ConfigWindow : Window
             }
             else
             {
-                ImGui.TextDisabled(settings.Mode == ContextMode.On ? Strings.Default : Strings.Dash);
+                ImGui.TextDisabled(usesDefaults ? $"{config.AwayMinutes} min" : Strings.Dash);
             }
         }
     }
@@ -215,12 +215,10 @@ public sealed class ConfigWindow : Window
         Section(Strings.WakeSection);
         if (Checkbox(Strings.WakeDuty, config.WakeDutyReady, v => config.WakeDutyReady = v))
             this.plugin.MarkDirty();
-        ImGui.TextDisabled(Strings.WakeDutyHint);
 
         if (Checkbox(Strings.WakeTell, config.WakeTell, v => config.WakeTell = v))
             this.plugin.MarkDirty();
-        this.Slider(Strings.WakeStay, config.WakeSeconds, 5, 60, "%d sec", v => config.WakeSeconds = v, !config.WakeTell);
-        ImGui.TextDisabled(Strings.WakeHint);
+        this.Slider(Strings.WakeStay, config.WakeSeconds, 5, 60, "%d sec", v => config.WakeSeconds = v, !config.WakeTell, Strings.WakeStayHelp);
 
         Section(Strings.ReminderSection);
         if (Checkbox(Strings.ReminderEnabled, config.ReminderEnabled, v => config.ReminderEnabled = v))
@@ -228,7 +226,6 @@ public sealed class ConfigWindow : Window
         this.Slider(Strings.ReminderEvery, config.ReminderIntervalSeconds, 15, 600, "%d sec", v => config.ReminderIntervalSeconds = v, !config.ReminderEnabled);
         this.Slider(Strings.ReminderBrightness, config.ReminderBrightnessPct, 5, 100, "%d %%", v => config.ReminderBrightnessPct = v, !config.ReminderEnabled);
         this.Slider(Strings.ReminderShowFor, config.ReminderDurationMs, 1000, 15000, "%d ms", v => config.ReminderDurationMs = v, !config.ReminderEnabled);
-        ImGui.TextDisabled(Strings.ReminderHint);
     }
 
     private void DrawGeneral()
@@ -261,7 +258,10 @@ public sealed class ConfigWindow : Window
         if (Checkbox(Strings.DtrEnabled, config.DtrEnabled, v => config.DtrEnabled = v))
             this.plugin.MarkDirty();
         this.Slider(Strings.DtrLead, config.DtrLeadSeconds, 5, 120, "%d sec", v => config.DtrLeadSeconds = v, !config.DtrEnabled);
-        ImGui.TextDisabled(Strings.DtrHint);
+
+        Section(Strings.CoverageSection);
+        if (Checkbox(Strings.KeepWindowsVisible, config.KeepPluginWindowsVisible, v => config.KeepPluginWindowsVisible = v, Strings.KeepWindowsVisibleHelp))
+            this.plugin.MarkDirty();
     }
 
     private void DrawStatus()
@@ -271,12 +271,12 @@ public sealed class ConfigWindow : Window
         var column = ImGui.GetFontSize() * 8;
 
         Row(Strings.StatusNow, column, Strings.StatusNowText(config, status));
-        Row(Strings.StatusIdle, column, Strings.StatusIdleText(status));
+        Row(Strings.StatusIdle, column, Strings.StatusIdleText(status), Strings.StatusIdleHelp);
         Row(Strings.StatusContext, column, Strings.StatusContextsText(status));
         Row(Strings.StatusNext, column, Strings.StatusNextText(config, status));
     }
 
-    private void Slider(string label, int value, int min, int max, string format, Action<int> set, bool disabled)
+    private void Slider(string label, int value, int min, int max, string format, Action<int> set, bool disabled, string? help = null)
     {
         using (ImRaii.PushIndent())
         using (ImRaii.Disabled(disabled))
@@ -284,13 +284,28 @@ public sealed class ConfigWindow : Window
             ImGui.SetNextItemWidth(this.SliderWidth);
             if (Slider(label, value, min, max, format, set))
                 this.plugin.MarkDirty();
+
+            if (help is not null)
+            {
+                ImGui.SameLine();
+                ImGuiComponents.HelpMarker(help);
+            }
         }
     }
 
-    private static bool Checkbox(string label, bool value, Action<bool> set)
+    private static bool Checkbox(string label, bool value, Action<bool> set, string? help = null)
     {
-        if (!ImGui.Checkbox(label, ref value))
+        var changed = ImGui.Checkbox(label, ref value);
+
+        if (help is not null)
+        {
+            ImGui.SameLine();
+            ImGuiComponents.HelpMarker(help);
+        }
+
+        if (!changed)
             return false;
+
         set(value);
         return true;
     }
@@ -303,17 +318,29 @@ public sealed class ConfigWindow : Window
         return true;
     }
 
-    private static void Section(string text)
+    private static void Section(string text, string? help = null)
     {
         ImGui.Spacing();
         ImGui.Text(text);
+        if (help is not null)
+        {
+            ImGui.SameLine();
+            ImGuiComponents.HelpMarker(help);
+        }
+
         ImGui.Separator();
         ImGui.Spacing();
     }
 
-    private static void Row(string label, float column, string value)
+    private static void Row(string label, float column, string value, string? help = null)
     {
         ImGui.TextDisabled(label);
+        if (help is not null)
+        {
+            ImGui.SameLine();
+            ImGuiComponents.HelpMarker(help);
+        }
+
         ImGui.SameLine(column);
         ImGui.Text(value);
     }

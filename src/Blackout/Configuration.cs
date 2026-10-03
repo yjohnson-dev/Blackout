@@ -68,6 +68,8 @@ public sealed class Configuration : IPluginConfiguration
 
     public int DtrLeadSeconds { get; set; } = 30;
 
+    public bool KeepPluginWindowsVisible { get; set; }
+
     public bool MuteEnabled { get; set; }
 
     // Replace stops Json.NET from appending to these collections on every load.
@@ -144,6 +146,7 @@ public sealed class Configuration : IPluginConfiguration
         this.ReminderDurationMs = 4000;
         this.DtrEnabled = true;
         this.DtrLeadSeconds = 30;
+        this.KeepPluginWindowsVisible = false;
         this.MuteEnabled = false;
         this.MuteChannels = new HashSet<AudioChannel> { AudioChannel.Bgm, AudioChannel.Se, AudioChannel.Voice };
         this.WakeDutyReady = true;
