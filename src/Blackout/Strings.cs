@@ -45,6 +45,8 @@ internal static class Strings
 
     public const string ReminderSection = "Reminder while the screen is black";
     public const string ReminderEnabled = "Show a reminder that the game is still running";
+    public const string ReminderLine1Label = "Line 1";
+    public const string ReminderSecondLineLabel = "Second line";
     public const string ReminderEvery = "Repeat every";
     public const string ReminderBrightness = "Text brightness";
     public const string ReminderShowFor = "Show for";
@@ -90,14 +92,26 @@ internal static class Strings
     public const string DisabledMessage = "Blackout is off.";
 
     // Reminder and server info bar.
-    public const string ReminderLine1 = "FINAL FANTASY XIV is still running";
     public const string DtrTooltip = "The screen will go black shortly. Move the mouse to postpone.";
 
     // Wake notes.
     public const string WakeDutyNote = "a duty pop";
     public const string WakeTellNote = "a tell";
 
-    public static string ReminderLine2(long blackForMs) => $"Screen black for {Format.Duration(blackForMs)}. Any input brings it back.";
+    public static string ReminderSecondLine(ReminderLine2Mode mode, long blackForMs) =>
+        ReminderTemplate(mode).Replace("{time}", Format.ReminderTime(blackForMs));
+
+    public static string ReminderSecondLineOption(ReminderLine2Mode mode) =>
+        ReminderTemplate(mode).Replace("{time}", "12:34 min");
+
+    private static string ReminderTemplate(ReminderLine2Mode mode) => mode switch
+    {
+        ReminderLine2Mode.ScreenBlackFor => "Screen has been black for {time}",
+        ReminderLine2Mode.SinceLastInteraction => "{time} since last interaction",
+        ReminderLine2Mode.InteractToRestore => "Interact with the game window to restore visuals",
+        ReminderLine2Mode.PluginEnabled => "The Blackout plugin is enabled",
+        _ => string.Empty,
+    };
 
     public static string DtrText(long remainingMs) => $"Blackout in {Format.Duration(remainingMs)}";
 

@@ -49,11 +49,17 @@ internal sealed class Overlay
 
         var grey = (int)Math.Round(255.0 * config.ReminderBrightnessPct / 100.0);
 
-        var line1 = Strings.ReminderLine1;
-        var line2 = Strings.ReminderLine2(status.BlackForMs);
-        var size1 = ImGui.CalcTextSize(line1);
-        var size2 = ImGui.CalcTextSize(line2);
-        var spacing = size1.Y * 0.4f;
+        var line1 = config.ReminderLine1 ?? string.Empty;
+        var line2 = config.ReminderLine2Enabled
+            ? Strings.ReminderSecondLine(config.ReminderLine2Mode, status.BlackForMs)
+            : string.Empty;
+
+        if (line1.Length == 0 && line2.Length == 0)
+            return;
+
+        var size1 = line1.Length > 0 ? ImGui.CalcTextSize(line1) : Vector2.Zero;
+        var size2 = line2.Length > 0 ? ImGui.CalcTextSize(line2) : Vector2.Zero;
+        var spacing = size1.Y > 0 && size2.Y > 0 ? size1.Y * 0.4f : 0f;
         var block = new Vector2(Math.Max(size1.X, size2.X), size1.Y + spacing + size2.Y);
 
         // The text moves to a new position on each interval, so no pixel stays lit.
@@ -63,8 +69,15 @@ internal sealed class Overlay
             + new Vector2((float)random.NextDouble() * room.X, (float)random.NextDouble() * room.Y);
 
         var color = Rgba(grey, fade);
-        drawList.AddText(origin + new Vector2((block.X - size1.X) / 2, 0), color, line1);
-        drawList.AddText(origin + new Vector2((block.X - size2.X) / 2, size1.Y + spacing), color, line2);
+        var y = 0f;
+        if (size1.Y > 0)
+        {
+            drawList.AddText(origin + new Vector2((block.X - size1.X) / 2, y), color, line1);
+            y += size1.Y + spacing;
+        }
+
+        if (size2.Y > 0)
+            drawList.AddText(origin + new Vector2((block.X - size2.X) / 2, y), color, line2);
     }
 
     private static uint Rgba(int grey, float alpha)
