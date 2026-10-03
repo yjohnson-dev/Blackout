@@ -48,7 +48,7 @@ public sealed class Plugin : IDalamudPlugin
         this.wake = new WakeWatcher(AddonLifecycle, Chat);
         this.Controller = new BlackoutController(this.Config, Condition, ClientState, Gamepad, this.wake);
         this.audio = new AudioMuter(GameConfig, this.Config, this.state, Log);
-        this.infoBar = new ServerInfoBar(DtrBar);
+        this.infoBar = new ServerInfoBar(DtrBar, Log);
 
         this.configWindow = new ConfigWindow(this);
         this.windows.AddWindow(this.configWindow);
