@@ -7,7 +7,7 @@
     <Punchline>Turns the screen black while you are away or the game is in the background.</Punchline>
     <Description>Fades the screen to black when the game is in the background or when you are away. You can change the behavior for duties, crafting, and other situations. A timer shows that the game is still running. This plugin helps to prevent burn-in on OLED monitors.</Description>
     <Tags>oled;burn-in;afk;utility</Tags>
-    <RepoUrl>https://github.com/yjohnson-dev/blackout</RepoUrl>
+    <RepoUrl>https://github.com/yjohnson-dev/xiv-blackout</RepoUrl>
 
     <!-- The build runs in a Linux container. This value permits the net10.0-windows target. -->
     <EnableWindowsTargeting>true</EnableWindowsTargeting>

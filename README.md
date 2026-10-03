@@ -21,7 +21,7 @@ Blackout turns the screen black when the game isn't actively in focus or when AF
 Add this URL to **Custom Plugin Repositories**:
 
    ```
-   https://raw.githubusercontent.com/yjohnson-dev/blackout/main/pluginmaster.json
+   https://raw.githubusercontent.com/yjohnson-dev/xiv-blackout/main/pluginmaster.json
    ```
 
 This is a third-party plugin. It is not reviewed by the Dalamud team.
