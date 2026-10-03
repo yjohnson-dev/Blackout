@@ -105,7 +105,7 @@ public sealed class Plugin : IDalamudPlugin
         if (status.Reason != this.lastReason)
         {
             this.lastReason = status.Reason;
-            Log.Info($"State {status.Reason}. focused={status.Focused} idle={status.IdleMs}ms background={status.BackgroundForMs}ms contexts=[{string.Join(", ", status.ActiveContexts)}]");
+            Log.Debug($"State {status.Reason}. focused={status.Focused} idle={status.IdleMs}ms background={status.BackgroundForMs}ms contexts=[{string.Join(", ", status.ActiveContexts)}]");
         }
 
         var blackedOut = this.Controller.BlackedOut;

@@ -36,7 +36,7 @@ public sealed class ContextSettings
 [Serializable]
 public sealed class Configuration : IPluginConfiguration
 {
-    public const int DefaultBackgroundSeconds = 10;
+    public const int DefaultBackgroundSeconds = 30;
     public const int DefaultAwayMinutes = 5;
 
     public int Version { get; set; } = 1;
