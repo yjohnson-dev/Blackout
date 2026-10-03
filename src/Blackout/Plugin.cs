@@ -44,7 +44,7 @@ public sealed class Plugin : IDalamudPlugin
         this.Config = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
         this.Config.EnsureDefaults();
 
-        this.state = new StateStore(PluginInterface);
+        this.state = new StateStore(PluginInterface, Log);
         this.wake = new WakeWatcher(AddonLifecycle, Chat);
         this.Controller = new BlackoutController(this.Config, Condition, ClientState, Gamepad, this.wake);
         this.audio = new AudioMuter(GameConfig, this.Config, this.state, Log);

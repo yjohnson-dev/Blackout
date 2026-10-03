@@ -102,6 +102,10 @@ public sealed class AudioMuter
 
     private bool TryGet(AudioChannel channel, out bool value)
     {
+        value = false;
+        if (!Enum.IsDefined(channel))
+            return false;
+
         if (this.gameConfig.TryGet(Option(channel), out value))
             return true;
 
@@ -111,6 +115,9 @@ public sealed class AudioMuter
 
     private void TrySet(AudioChannel channel, bool value)
     {
+        if (!Enum.IsDefined(channel))
+            return;
+
         try
         {
             this.gameConfig.Set(Option(channel), value);

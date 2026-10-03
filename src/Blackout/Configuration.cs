@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dalamud.Configuration;
 using Newtonsoft.Json;
 
@@ -91,6 +92,32 @@ public sealed class Configuration : IPluginConfiguration
         {
             if (!this.Contexts.ContainsKey(context))
                 this.Contexts[context] = GameContexts.DefaultFor(context);
+        }
+
+        this.Sanitize();
+    }
+
+    /// <summary>Clamps hand-edited or corrupt values into the ranges that the interface permits.</summary>
+    public void Sanitize()
+    {
+        this.BackgroundSeconds = Math.Clamp(this.BackgroundSeconds, 3, 120);
+        this.AwayMinutes = Math.Clamp(this.AwayMinutes, 1, 30);
+        this.FadeMs = Math.Clamp(this.FadeMs, 0, 1000);
+        this.ReminderIntervalSeconds = Math.Clamp(this.ReminderIntervalSeconds, 15, 600);
+        this.ReminderBrightnessPct = Math.Clamp(this.ReminderBrightnessPct, 5, 100);
+        this.ReminderDurationMs = Math.Clamp(this.ReminderDurationMs, 1000, 15000);
+        this.DtrLeadSeconds = Math.Clamp(this.DtrLeadSeconds, 5, 120);
+        this.WakeSeconds = Math.Clamp(this.WakeSeconds, 5, 60);
+
+        this.MuteChannels.RemoveWhere(channel => !Enum.IsDefined(channel));
+
+        foreach (var context in this.Contexts.Keys.Where(key => !Enum.IsDefined(key)).ToList())
+            this.Contexts.Remove(context);
+
+        foreach (var settings in this.Contexts.Values)
+        {
+            settings.BackgroundSeconds = Math.Clamp(settings.BackgroundSeconds, 3, 600);
+            settings.AwayMinutes = Math.Clamp(settings.AwayMinutes, 1, 120);
         }
     }
 
