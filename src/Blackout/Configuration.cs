@@ -23,6 +23,14 @@ public enum AudioChannel
     Perform,
 }
 
+public enum ReminderLine2Mode
+{
+    ScreenBlackFor,
+    SinceLastInteraction,
+    InteractToRestore,
+    PluginEnabled,
+}
+
 [Serializable]
 public sealed class ContextSettings
 {
@@ -39,6 +47,8 @@ public sealed class Configuration : IPluginConfiguration
 {
     public const int DefaultBackgroundSeconds = 30;
     public const int DefaultAwayMinutes = 5;
+    public const string DefaultReminderLine1 = "FINAL FANTASY XIV is still running";
+    public const int ReminderLineMaxLength = 120;
 
     public int Version { get; set; } = 1;
 
@@ -57,6 +67,12 @@ public sealed class Configuration : IPluginConfiguration
     public int FadeMs { get; set; } = 400;
 
     public bool ReminderEnabled { get; set; } = true;
+
+    public string ReminderLine1 { get; set; } = DefaultReminderLine1;
+
+    public bool ReminderLine2Enabled { get; set; } = true;
+
+    public ReminderLine2Mode ReminderLine2Mode { get; set; } = ReminderLine2Mode.ScreenBlackFor;
 
     public int ReminderIntervalSeconds { get; set; } = 60;
 
@@ -105,6 +121,7 @@ public sealed class Configuration : IPluginConfiguration
         this.BackgroundSeconds = Math.Clamp(this.BackgroundSeconds, 3, 120);
         this.AwayMinutes = Math.Clamp(this.AwayMinutes, 1, 30);
         this.FadeMs = Math.Clamp(this.FadeMs, 0, 1000);
+        this.ReminderLine1 = SanitizeReminderLine(this.ReminderLine1);
         this.ReminderIntervalSeconds = Math.Clamp(this.ReminderIntervalSeconds, 15, 600);
         this.ReminderBrightnessPct = Math.Clamp(this.ReminderBrightnessPct, 5, 100);
         this.ReminderDurationMs = Math.Clamp(this.ReminderDurationMs, 1000, 15000);
@@ -121,6 +138,16 @@ public sealed class Configuration : IPluginConfiguration
             settings.BackgroundSeconds = Math.Clamp(settings.BackgroundSeconds, 3, 600);
             settings.AwayMinutes = Math.Clamp(settings.AwayMinutes, 1, 120);
         }
+    }
+
+    /// <summary>Keeps user-entered reminder text to one line of a sane length.</summary>
+    private static string SanitizeReminderLine(string? text)
+    {
+        if (text is null)
+            return DefaultReminderLine1;
+
+        text = text.Replace('\n', ' ').Replace('\r', ' ').Trim();
+        return text.Length > ReminderLineMaxLength ? text[..ReminderLineMaxLength] : text;
     }
 
     public ContextSettings Settings(GameContext context)
@@ -141,6 +168,9 @@ public sealed class Configuration : IPluginConfiguration
         this.AwayMinutes = DefaultAwayMinutes;
         this.FadeMs = 400;
         this.ReminderEnabled = true;
+        this.ReminderLine1 = DefaultReminderLine1;
+        this.ReminderLine2Enabled = true;
+        this.ReminderLine2Mode = ReminderLine2Mode.ScreenBlackFor;
         this.ReminderIntervalSeconds = 60;
         this.ReminderBrightnessPct = 25;
         this.ReminderDurationMs = 4000;

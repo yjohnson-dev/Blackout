@@ -223,6 +223,39 @@ public sealed class ConfigWindow : Window
         Section(Strings.ReminderSection);
         if (Checkbox(Strings.ReminderEnabled, config.ReminderEnabled, v => config.ReminderEnabled = v))
             this.plugin.MarkDirty();
+
+        using (ImRaii.PushIndent())
+        using (ImRaii.Disabled(!config.ReminderEnabled))
+        {
+            ImGui.SetNextItemWidth(-1);
+            var line1 = config.ReminderLine1;
+            if (ImGui.InputText(Strings.ReminderLine1Label, ref line1, Configuration.ReminderLineMaxLength))
+            {
+                config.ReminderLine1 = line1;
+                this.plugin.MarkDirty();
+            }
+
+            if (Checkbox(Strings.ReminderSecondLineLabel, config.ReminderLine2Enabled, v => config.ReminderLine2Enabled = v))
+                this.plugin.MarkDirty();
+
+            using (ImRaii.Disabled(!config.ReminderLine2Enabled))
+            {
+                ImGui.SetNextItemWidth(-1);
+                using var combo = ImRaii.Combo("##reminderSecondLine", Strings.ReminderSecondLineOption(config.ReminderLine2Mode));
+                if (combo.Success)
+                {
+                    foreach (var mode in Enum.GetValues<ReminderLine2Mode>())
+                    {
+                        if (ImGui.Selectable(Strings.ReminderSecondLineOption(mode), mode == config.ReminderLine2Mode))
+                        {
+                            config.ReminderLine2Mode = mode;
+                            this.plugin.MarkDirty();
+                        }
+                    }
+                }
+            }
+        }
+
         this.Slider(Strings.ReminderEvery, config.ReminderIntervalSeconds, 15, 600, "%d sec", v => config.ReminderIntervalSeconds = v, !config.ReminderEnabled);
         this.Slider(Strings.ReminderBrightness, config.ReminderBrightnessPct, 5, 100, "%d %%", v => config.ReminderBrightnessPct = v, !config.ReminderEnabled);
         this.Slider(Strings.ReminderShowFor, config.ReminderDurationMs, 1000, 15000, "%d ms", v => config.ReminderDurationMs = v, !config.ReminderEnabled);
