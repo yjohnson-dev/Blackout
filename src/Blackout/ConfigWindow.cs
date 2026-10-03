@@ -34,41 +34,41 @@ public sealed class ConfigWindow : Window
     {
         var config = this.Config;
 
-        if (Checkbox("Enabled", config.Enabled, v => config.Enabled = v))
+        if (Checkbox(Strings.Enabled, config.Enabled, v => config.Enabled = v))
             this.plugin.MarkDirty();
 
         ImGui.SameLine();
-        ImGui.TextDisabled(StatusText.Summary(config, this.plugin.Controller.Status));
+        ImGui.TextDisabled(Strings.StatusSummary(config, this.plugin.Controller.Status));
 
         ImGui.Separator();
 
         if (ImGui.BeginTabBar("BlackoutTabs"))
         {
-            using (var tab = ImRaii.TabItem("Timing"))
+            using (var tab = ImRaii.TabItem(Strings.TabTiming))
             {
                 if (tab.Success)
                     this.DrawTiming();
             }
 
-            using (var tab = ImRaii.TabItem("Contexts"))
+            using (var tab = ImRaii.TabItem(Strings.TabContexts))
             {
                 if (tab.Success)
                     this.DrawContexts();
             }
 
-            using (var tab = ImRaii.TabItem("Alerts"))
+            using (var tab = ImRaii.TabItem(Strings.TabAlerts))
             {
                 if (tab.Success)
                     this.DrawAlerts();
             }
 
-            using (var tab = ImRaii.TabItem("General"))
+            using (var tab = ImRaii.TabItem(Strings.TabGeneral))
             {
                 if (tab.Success)
                     this.DrawGeneral();
             }
 
-            using (var tab = ImRaii.TabItem("Status"))
+            using (var tab = ImRaii.TabItem(Strings.TabStatus))
             {
                 if (tab.Success)
                     this.DrawStatus();
@@ -80,14 +80,15 @@ public sealed class ConfigWindow : Window
         ImGui.Separator();
         ImGui.Spacing();
 
-        if (ImGui.Button("Test for 5 seconds"))
+        if (ImGui.Button(Strings.Preview))
             this.plugin.Controller.StartPreview();
 
         ImGui.SameLine();
 
         var now = Environment.TickCount64;
         var confirming = now < this.resetConfirmUntil;
-        if (ImGui.Button(confirming ? "Click again to reset###reset" : "Reset all settings###reset"))
+        var resetLabel = confirming ? Strings.ResetConfirm : Strings.Reset;
+        if (ImGui.Button($"{resetLabel}###reset"))
         {
             if (confirming)
             {
@@ -106,26 +107,26 @@ public sealed class ConfigWindow : Window
     {
         var config = this.Config;
 
-        if (Checkbox("When the game is in the background", config.BackgroundEnabled, v => config.BackgroundEnabled = v))
+        if (Checkbox(Strings.BackgroundEnabled, config.BackgroundEnabled, v => config.BackgroundEnabled = v))
             this.plugin.MarkDirty();
-        this.Slider("after", config.BackgroundSeconds, 3, 120, "%d sec", v => config.BackgroundSeconds = v, !config.BackgroundEnabled);
+        this.Slider(Strings.BackgroundAfter, config.BackgroundSeconds, 3, 120, "%d sec", v => config.BackgroundSeconds = v, !config.BackgroundEnabled);
 
         ImGui.Spacing();
 
-        if (Checkbox("When you are away (no input)", config.AwayEnabled, v => config.AwayEnabled = v))
+        if (Checkbox(Strings.AwayEnabled, config.AwayEnabled, v => config.AwayEnabled = v))
             this.plugin.MarkDirty();
-        this.Slider("after", config.AwayMinutes, 1, 30, "%d min", v => config.AwayMinutes = v, !config.AwayEnabled);
+        this.Slider(Strings.AwayAfter, config.AwayMinutes, 1, 30, "%d min", v => config.AwayMinutes = v, !config.AwayEnabled);
 
         ImGui.Spacing();
-        this.Slider("Fade time", config.FadeMs, 0, 1000, "%d ms", v => config.FadeMs = v, false);
+        this.Slider(Strings.FadeTime, config.FadeMs, 0, 1000, "%d ms", v => config.FadeMs = v, false);
 
         ImGui.Spacing();
 
-        if (Checkbox("Only while logged in", config.OnlyWhenLoggedIn, v => config.OnlyWhenLoggedIn = v))
+        if (Checkbox(Strings.OnlyWhenLoggedIn, config.OnlyWhenLoggedIn, v => config.OnlyWhenLoggedIn = v))
             this.plugin.MarkDirty();
 
-        ImGui.TextDisabled("This stops the blackout at the title screen and the character select screen.");
-        ImGui.TextDisabled("Press Ctrl and click a slider to type a value.");
+        ImGui.TextDisabled(Strings.OnlyWhenLoggedInHint);
+        ImGui.TextDisabled(Strings.SliderHint);
     }
 
     private void DrawContexts()
@@ -133,8 +134,8 @@ public sealed class ConfigWindow : Window
         var config = this.Config;
         var active = this.plugin.Controller.Status.ActiveContexts;
 
-        ImGui.TextDisabled("If more than one context applies, the most relaxed setting wins.");
-        ImGui.TextDisabled("Off wins over all. A green name means the context is active now.");
+        ImGui.TextDisabled(Strings.ContextsHint1);
+        ImGui.TextDisabled(Strings.ContextsHint2);
         ImGui.Spacing();
 
         const ImGuiTableFlags flags = ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.SizingStretchProp;
@@ -142,10 +143,10 @@ public sealed class ConfigWindow : Window
         if (!table.Success)
             return;
 
-        ImGui.TableSetupColumn("Context", ImGuiTableColumnFlags.WidthFixed, ImGui.GetFontSize() * 11);
-        ImGui.TableSetupColumn("Behavior", ImGuiTableColumnFlags.WidthFixed, ImGui.GetFontSize() * 12);
-        ImGui.TableSetupColumn("In background", ImGuiTableColumnFlags.WidthStretch);
-        ImGui.TableSetupColumn("Away", ImGuiTableColumnFlags.WidthStretch);
+        ImGui.TableSetupColumn(Strings.ColumnContext, ImGuiTableColumnFlags.WidthFixed, ImGui.GetFontSize() * 11);
+        ImGui.TableSetupColumn(Strings.ColumnBehavior, ImGuiTableColumnFlags.WidthFixed, ImGui.GetFontSize() * 12);
+        ImGui.TableSetupColumn(Strings.ColumnBackground, ImGuiTableColumnFlags.WidthStretch);
+        ImGui.TableSetupColumn(Strings.ColumnAway, ImGuiTableColumnFlags.WidthStretch);
         ImGui.TableHeadersRow();
 
         foreach (var context in GameContexts.All)
@@ -154,7 +155,7 @@ public sealed class ConfigWindow : Window
             ImGui.TableNextRow();
 
             ImGui.TableNextColumn();
-            var label = UiText.Context(context);
+            var label = Strings.Context(context);
             if (active.Contains(context))
                 ImGui.TextColored(ActiveColor, label);
             else
@@ -164,13 +165,13 @@ public sealed class ConfigWindow : Window
 
             ImGui.TableNextColumn();
             ImGui.SetNextItemWidth(-1);
-            using (var combo = ImRaii.Combo("##mode", UiText.Mode(settings.Mode)))
+            using (var combo = ImRaii.Combo("##mode", Strings.Mode(settings.Mode)))
             {
                 if (combo.Success)
                 {
                     foreach (var mode in Enum.GetValues<ContextMode>())
                     {
-                        if (ImGui.Selectable(UiText.Mode(mode), mode == settings.Mode))
+                        if (ImGui.Selectable(Strings.Mode(mode), mode == settings.Mode))
                         {
                             settings.Mode = mode;
                             this.plugin.MarkDirty();
@@ -190,7 +191,7 @@ public sealed class ConfigWindow : Window
             }
             else
             {
-                ImGui.TextDisabled(settings.Mode == ContextMode.On ? "default" : "-");
+                ImGui.TextDisabled(settings.Mode == ContextMode.On ? Strings.Default : Strings.Dash);
             }
 
             ImGui.TableNextColumn();
@@ -202,7 +203,7 @@ public sealed class ConfigWindow : Window
             }
             else
             {
-                ImGui.TextDisabled(settings.Mode == ContextMode.On ? "default" : "-");
+                ImGui.TextDisabled(settings.Mode == ContextMode.On ? Strings.Default : Strings.Dash);
             }
         }
     }
@@ -211,31 +212,31 @@ public sealed class ConfigWindow : Window
     {
         var config = this.Config;
 
-        Section("Wake the screen");
-        if (Checkbox("A duty is ready", config.WakeDutyReady, v => config.WakeDutyReady = v))
+        Section(Strings.WakeSection);
+        if (Checkbox(Strings.WakeDuty, config.WakeDutyReady, v => config.WakeDutyReady = v))
             this.plugin.MarkDirty();
-        ImGui.TextDisabled("The screen stays on while the duty window is open.");
+        ImGui.TextDisabled(Strings.WakeDutyHint);
 
-        if (Checkbox("You get a direct message", config.WakeTell, v => config.WakeTell = v))
+        if (Checkbox(Strings.WakeTell, config.WakeTell, v => config.WakeTell = v))
             this.plugin.MarkDirty();
-        this.Slider("Keep the screen on for", config.WakeSeconds, 5, 60, "%d sec", v => config.WakeSeconds = v, !config.WakeTell);
-        ImGui.TextDisabled("The sound returns with the screen.");
+        this.Slider(Strings.WakeStay, config.WakeSeconds, 5, 60, "%d sec", v => config.WakeSeconds = v, !config.WakeTell);
+        ImGui.TextDisabled(Strings.WakeHint);
 
-        Section("Reminder");
-        if (Checkbox("Show a reminder that the game is running", config.ReminderEnabled, v => config.ReminderEnabled = v))
+        Section(Strings.ReminderSection);
+        if (Checkbox(Strings.ReminderEnabled, config.ReminderEnabled, v => config.ReminderEnabled = v))
             this.plugin.MarkDirty();
-        this.Slider("Every", config.ReminderIntervalSeconds, 15, 600, "%d sec", v => config.ReminderIntervalSeconds = v, !config.ReminderEnabled);
-        this.Slider("Brightness", config.ReminderBrightnessPct, 5, 100, "%d %%", v => config.ReminderBrightnessPct = v, !config.ReminderEnabled);
-        this.Slider("Show for", config.ReminderDurationMs, 1000, 15000, "%d ms", v => config.ReminderDurationMs = v, !config.ReminderEnabled);
-        ImGui.TextDisabled("The text is dim. It moves to a new position each time.");
+        this.Slider(Strings.ReminderEvery, config.ReminderIntervalSeconds, 15, 600, "%d sec", v => config.ReminderIntervalSeconds = v, !config.ReminderEnabled);
+        this.Slider(Strings.ReminderBrightness, config.ReminderBrightnessPct, 5, 100, "%d %%", v => config.ReminderBrightnessPct = v, !config.ReminderEnabled);
+        this.Slider(Strings.ReminderShowFor, config.ReminderDurationMs, 1000, 15000, "%d ms", v => config.ReminderDurationMs = v, !config.ReminderEnabled);
+        ImGui.TextDisabled(Strings.ReminderHint);
     }
 
     private void DrawGeneral()
     {
         var config = this.Config;
 
-        Section("Audio");
-        if (Checkbox("Mute the game when the screen is black", config.MuteEnabled, v => config.MuteEnabled = v))
+        Section(Strings.AudioSection);
+        if (Checkbox(Strings.MuteEnabled, config.MuteEnabled, v => config.MuteEnabled = v))
             this.plugin.MarkDirty();
 
         using (ImRaii.Disabled(!config.MuteEnabled))
@@ -244,7 +245,7 @@ public sealed class ConfigWindow : Window
             foreach (var channel in Enum.GetValues<AudioChannel>())
             {
                 var on = config.MuteChannels.Contains(channel);
-                if (!ImGui.Checkbox(UiText.Channel(channel), ref on))
+                if (!ImGui.Checkbox(Strings.Channel(channel), ref on))
                     continue;
 
                 if (on)
@@ -256,11 +257,11 @@ public sealed class ConfigWindow : Window
             }
         }
 
-        Section("Server information bar");
-        if (Checkbox("Show a countdown before the screen goes black", config.DtrEnabled, v => config.DtrEnabled = v))
+        Section(Strings.DtrSection);
+        if (Checkbox(Strings.DtrEnabled, config.DtrEnabled, v => config.DtrEnabled = v))
             this.plugin.MarkDirty();
-        this.Slider("Show it this long before", config.DtrLeadSeconds, 5, 120, "%d sec", v => config.DtrLeadSeconds = v, !config.DtrEnabled);
-        ImGui.TextDisabled("The countdown is hidden at all other times.");
+        this.Slider(Strings.DtrLead, config.DtrLeadSeconds, 5, 120, "%d sec", v => config.DtrLeadSeconds = v, !config.DtrEnabled);
+        ImGui.TextDisabled(Strings.DtrHint);
     }
 
     private void DrawStatus()
@@ -269,10 +270,10 @@ public sealed class ConfigWindow : Window
         var status = this.plugin.Controller.Status;
         var column = ImGui.GetFontSize() * 8;
 
-        Row("Now", column, StatusText.Now(config, status));
-        Row("No input for", column, StatusText.Idle(status));
-        Row("Situation", column, StatusText.Contexts(status));
-        Row("Next blackout", column, StatusText.Next(config, status));
+        Row(Strings.StatusNow, column, Strings.StatusNowText(config, status));
+        Row(Strings.StatusIdle, column, Strings.StatusIdleText(status));
+        Row(Strings.StatusContext, column, Strings.StatusContextsText(status));
+        Row(Strings.StatusNext, column, Strings.StatusNextText(config, status));
     }
 
     private void Slider(string label, int value, int min, int max, string format, Action<int> set, bool disabled)

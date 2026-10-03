@@ -34,7 +34,7 @@ public sealed class BlackoutStatus
 public sealed class BlackoutController
 {
     private const float StickDeadzone = 25f;
-    private const long PreviewMs = 5000;
+    public const long PreviewMs = 5000;
 
     private static readonly GamepadButtons[] Buttons = Enum.GetValues<GamepadButtons>();
 
@@ -52,6 +52,8 @@ public sealed class BlackoutController
     private long lastGamepadInput = Clock.Now;
     private long? unfocusedSince;
     private long previewUntil;
+    private long previewGraceUntil;
+    private uint previewInputBaseline;
     private long blackSince;
 
     public BlackoutController(
@@ -74,7 +76,13 @@ public sealed class BlackoutController
 
     public bool BlackedOut => this.status.Reason != BlackoutReason.None;
 
-    public void StartPreview() => this.previewUntil = Clock.Now + PreviewMs;
+    public void StartPreview()
+    {
+        var now = Clock.Now;
+        this.previewUntil = now + PreviewMs;
+        this.previewGraceUntil = now + 400; // ignore the click or key that started the test
+        this.previewInputBaseline = Win32.LastInputTick();
+    }
 
     public void ToggleManual() => this.manual.Toggle();
 
@@ -94,6 +102,14 @@ public sealed class BlackoutController
             this.unfocusedSince ??= now;
 
         this.manual.Update(now, Win32.LastInputTick(), this.lastGamepadInput);
+
+        if (now < this.previewUntil)
+        {
+            if (now < this.previewGraceUntil)
+                this.previewInputBaseline = Win32.LastInputTick();
+            else if (Win32.LastInputTick() != this.previewInputBaseline)
+                this.previewUntil = 0;
+        }
 
         var s = this.status;
         s.ActiveContexts.Clear();
@@ -198,14 +214,14 @@ public sealed class BlackoutController
     {
         if (this.config.WakeDutyReady && this.wake.DutyPopupVisible)
         {
-            note = "A duty is ready";
+            note = Strings.WakeDutyNote;
             return true;
         }
 
         if (this.config.WakeTell && this.wake.LastTellTick != long.MinValue
             && now - this.wake.LastTellTick <= this.config.WakeSeconds * 1000L)
         {
-            note = "You have a direct message";
+            note = Strings.WakeTellNote;
             return true;
         }
 

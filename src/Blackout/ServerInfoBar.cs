@@ -34,12 +34,12 @@ public sealed class ServerInfoBar : IDisposable
             return;
         }
 
-        var text = $"Blackout {Format.Duration(nextBlackoutMs!.Value)}";
+        var text = Strings.DtrText(nextBlackoutMs!.Value);
         if (text == this.lastText)
             return;
 
         this.entry.Text = text;
-        this.entry.Tooltip = "The screen goes black soon. Move the mouse to delay this.";
+        this.entry.Tooltip = Strings.DtrTooltip;
         this.lastText = text;
     }
 

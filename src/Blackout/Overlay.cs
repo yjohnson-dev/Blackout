@@ -16,24 +16,39 @@ internal sealed class Overlay
         var drawList = ImGui.GetForegroundDrawList();
         drawList.AddRectFilled(viewport.Pos, viewport.Pos + viewport.Size, Rgba(0, alpha));
 
-        if (alpha < 1f || !config.ReminderEnabled || status.Reason == BlackoutReason.Preview)
+        if (alpha < 1f || !config.ReminderEnabled)
             return;
 
-        var interval = config.ReminderIntervalSeconds * 1000L;
-        var showMs = config.ReminderDurationMs;
-        if (status.BlackForMs < interval)
-            return;
+        long cycle;
+        float fade;
 
-        var cycle = (status.BlackForMs - interval) / interval;
-        var phase = (status.BlackForMs - interval) % interval;
-        if (phase >= showMs)
-            return;
+        if (status.Reason == BlackoutReason.Preview)
+        {
+            // A preview shows the reminder at once, so the test looks like a real blackout.
+            var total = BlackoutController.PreviewMs;
+            var elapsed = Math.Clamp(status.BlackForMs, 0, total);
+            fade = Math.Clamp(Math.Min(elapsed, total - elapsed) / ReminderFadeMs, 0f, 1f);
+            cycle = 0;
+        }
+        else
+        {
+            var interval = config.ReminderIntervalSeconds * 1000L;
+            var showMs = config.ReminderDurationMs;
+            if (status.BlackForMs < interval)
+                return;
 
-        var fade = Math.Clamp(Math.Min(phase, showMs - phase) / ReminderFadeMs, 0f, 1f);
+            cycle = (status.BlackForMs - interval) / interval;
+            var phase = (status.BlackForMs - interval) % interval;
+            if (phase >= showMs)
+                return;
+
+            fade = Math.Clamp(Math.Min(phase, showMs - phase) / ReminderFadeMs, 0f, 1f);
+        }
+
         var grey = (int)Math.Round(255.0 * config.ReminderBrightnessPct / 100.0);
 
-        var line1 = "FINAL FANTASY XIV is still running.";
-        var line2 = $"Black for {Format.Duration(status.BlackForMs)}. Move the mouse or press a key to return.";
+        var line1 = Strings.ReminderLine1;
+        var line2 = Strings.ReminderLine2(status.BlackForMs);
         var size1 = ImGui.CalcTextSize(line1);
         var size2 = ImGui.CalcTextSize(line2);
         var spacing = size1.Y * 0.4f;

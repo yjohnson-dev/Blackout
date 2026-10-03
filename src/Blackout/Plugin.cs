@@ -37,6 +37,7 @@ public sealed class Plugin : IDalamudPlugin
     private readonly WakeWatcher wake;
 
     private long? dirtySince;
+    private BlackoutReason lastReason = BlackoutReason.None;
 
     public Plugin()
     {
@@ -99,10 +100,17 @@ public sealed class Plugin : IDalamudPlugin
     private void OnUpdate(IFramework framework)
     {
         this.Controller.Update();
+        var status = this.Controller.Status;
+
+        if (status.Reason != this.lastReason)
+        {
+            this.lastReason = status.Reason;
+            Log.Info($"State {status.Reason}. focused={status.Focused} idle={status.IdleMs}ms background={status.BackgroundForMs}ms contexts=[{string.Join(", ", status.ActiveContexts)}]");
+        }
 
         var blackedOut = this.Controller.BlackedOut;
         this.audio.SetMuted(this.Config.MuteEnabled && blackedOut);
-        this.infoBar.Update(this.Config, blackedOut, this.Controller.Status.BlackoutInMs);
+        this.infoBar.Update(this.Config, blackedOut, status.BlackoutInMs);
 
         if (this.dirtySince is { } since && Clock.Now - since >= SaveDebounceMs)
         {
@@ -137,11 +145,11 @@ public sealed class Plugin : IDalamudPlugin
                 this.Config.Enabled = false;
                 break;
             default:
-                Chat.Print("Use /blackout to open the settings. You can also use /blackout now, /blackout preview, /blackout on, or /blackout off.");
+                Chat.Print(Strings.CommandUsage);
                 return;
         }
 
         this.MarkDirty();
-        Chat.Print(this.Config.Enabled ? "Blackout is on." : "Blackout is off.");
+        Chat.Print(this.Config.Enabled ? Strings.EnabledMessage : Strings.DisabledMessage);
     }
 }
